@@ -13,6 +13,63 @@ Inspired by [hadley/bananarama](https://github.com/hadley/bananarama).
 - **Full reproducibility** — every generation stores prompt, style, provider, model, settings, and timestamp
 - **Generation history** — browse, search, download, and rerun past generations
 
+## Examples
+
+### Retro illustration — coffee shop
+
+![Retro illustration](img/retro-illustration-coffee.png)
+
+> **Prompt:** A man at a coffee shop using a MacBook and working with Claude Code. The coffee shop overlooks Monterey Bay.
+>
+> **Reference image:** none
+
+```yaml
+name: Retro illustration
+style_prompt: >
+  Retro-futurist editorial illustration with sleek shapes, limited contrast,
+  soft grain, and a refined late-60s/70s speculative design influence. Muted
+  but confident palette. Clean, conceptual, modern, and visually memorable
+  for presentation storytelling.
+```
+
+---
+
+### Flat 2D kids — coffee shop
+
+![Flat 2D kids](img/flat2d-kids-coffee.png)
+
+> **Prompt:** A man at a coffee shop using a MacBook and working with Claude Code. The coffee shop overlooks Monterey Bay.
+>
+> **Reference image:** none
+
+```yaml
+name: Flat 2d - kids
+style_prompt: >
+  Flat 2D preschool-style illustration with friendly rounded forms, light blue
+  and cream palette, clean edges, playful motion, simple environment design,
+  optimistic and cozy mood, highly readable for presentation use.
+```
+
+---
+
+### Retro comic book — pickleball
+
+![Retro comic book](img/retro-comic-pickleball.png)
+
+> **Prompt:** A couple dominating a game of pickleball.
+>
+> **Reference image:** none
+
+```yaml
+name: Retro comic book
+style_prompt: >
+  Retro silver-age comic illustration with clean linework, bright flat colors,
+  vintage halftone texture, expressive faces, simplified backgrounds, playful
+  dramatic action, nostalgic comic book energy, presentation-friendly composition.
+```
+
+---
+
 ## Quick start
 
 ```bash
