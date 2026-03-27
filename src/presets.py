@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 
 try:
@@ -15,8 +16,19 @@ def _presets_path() -> Path:
     return Path(os.environ.get("PRESETS_PATH", Path(__file__).parent.parent / "presets.yaml"))
 
 
+def _seed_presets_if_needed(path: Path) -> None:
+    """Copy bundled presets.yaml to path on first run (e.g. Railway volume mount)."""
+    if path.exists():
+        return
+    bundled = Path(__file__).parent.parent / "presets.yaml"
+    if bundled.exists() and bundled.resolve() != path.resolve():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(bundled, path)
+
+
 def get_presets() -> list[dict]:
     path = _presets_path()
+    _seed_presets_if_needed(path)
     if not path.exists():
         return []
     data = yaml.safe_load(path.read_text()) or {}
