@@ -8,7 +8,6 @@ Tabs:
 """
 
 import json
-from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -95,13 +94,6 @@ with st.sidebar:
         st.warning(f"`{env_key_var}` not set.")
 
     st.divider()
-    st.header("Generation settings")
-
-    title = st.text_input("Title", placeholder="Q1 Roadmap hero image")
-    project_name = st.text_input("Project / deck", placeholder="Q1 2025 All-Hands")
-    tags = st.text_input("Tags (comma-separated)", placeholder="roadmap, blue, wide")
-
-    st.subheader("Provider settings")
     extra_settings: dict = {}
     current_provider = st.session_state.provider
 
@@ -154,14 +146,20 @@ with tab_generate:
                 if missing_tokens:
                     st.caption(f"Unknown references (will be ignored): {', '.join(missing_tokens)}")
 
-        enhance = st.checkbox(
-            "Enhance prompt with Gemini",
-            value=False,
-            help="Refines your prompt using Gemini before generation.",
-        )
+        enhance = False
+        if current_provider == "google-gemini":
+            enhance = st.checkbox(
+                "Enhance prompt with Gemini",
+                value=False,
+                help="Refines your prompt using Gemini before generation.",
+            )
 
-        st.write("")
         generate_btn = st.button("Generate", type="primary", width="stretch")
+
+        with st.expander("Add metadata (optional)"):
+            title = st.text_input("Title", placeholder="Q1 Roadmap hero image")
+            project_name = st.text_input("Project / deck", placeholder="Q1 2025 All-Hands")
+            tags = st.text_input("Tags (comma-separated)", placeholder="roadmap, blue, wide")
 
     with col_right:
         presets = preset_store.get_presets()
@@ -172,34 +170,36 @@ with tab_generate:
         if selected_preset_name != "— none —":
             preset = next(p for p in presets if p["name"] == selected_preset_name)
             style_prompt = preset["style_prompt"]
+            st.caption(style_prompt)
 
-        st.write("")
+        st.divider()
         saved_refs = ref_store.list_references()
-        ref_options = ["— none —"] + [p.name for p in saved_refs]
-        selected_ref_name = st.selectbox(
+        ref_mode = st.radio(
             "Reference image",
-            ref_options,
-            help="Saved references from the References tab. Google Gemini only.",
+            ["None", "From library", "Upload"],
+            horizontal=True,
+            help="Google Gemini only.",
         )
 
-        reference_file = st.file_uploader(
-            "Or upload a one-off reference",
-            type=["png", "jpg", "jpeg"],
-        )
+        reference_image_bytes = None
+        if ref_mode == "From library":
+            ref_options = [p.name for p in saved_refs]
+            if ref_options:
+                selected_ref_name = st.selectbox("Saved reference", ref_options)
+                ref_path = next(p for p in saved_refs if p.name == selected_ref_name)
+                reference_image_bytes = ref_path.read_bytes()
+            else:
+                st.caption("No saved references yet — add some in the References tab.")
+        elif ref_mode == "Upload":
+            reference_file = st.file_uploader("Image file", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
+            if reference_file is not None:
+                reference_image_bytes = reference_file.read()
 
         if current_provider == "google-gemini":
-            st.write("")
+            st.divider()
             extra_settings["aspect_ratio"] = st.selectbox(
                 "Aspect ratio", ["16:9", "1:1", "9:16", "4:3", "3:4"]
             )
-
-    # Resolve reference image bytes (no preview shown here)
-    reference_image_bytes = None
-    if reference_file is not None:
-        reference_image_bytes = reference_file.read()
-    elif selected_ref_name != "— none —":
-        ref_path = next(p for p in saved_refs if p.name == selected_ref_name)
-        reference_image_bytes = ref_path.read_bytes()
 
     if generate_btn:
         if not base_prompt.strip():
@@ -332,9 +332,6 @@ with tab_history:
 with tab_presets:
     st.header("Style Presets")
 
-    from src.presets import _presets_path
-    st.caption(f"Stored in `{_presets_path()}`")
-
     with st.form("new_preset_form"):
         st.subheader("Create a new preset")
         preset_name = st.text_input("Preset name", placeholder="Clean Corporate")
@@ -385,7 +382,6 @@ with tab_presets:
 
 with tab_refs:
     st.header("Reference Images")
-    st.caption(f"Stored in `{ref_store.get_references_dir()}`  — you can also drop files there directly.")
 
     with st.form("upload_ref_form"):
         st.subheader("Add a reference image")
