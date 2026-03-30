@@ -201,24 +201,11 @@ def require_auth(cookie_manager) -> None:
         code = params.get("code", "")
         state = params.get("state", "")
 
-        # Guard against Streamlit double-rerun consuming the state twice.
-        if st.session_state.get("_auth_callback_state") == state:
-            st.stop()
-
         if not _consume_state(state):
-            conn = sqlite3.connect(str(_db_path()))
-            rows = conn.execute("SELECT state, created_at FROM oauth_states").fetchall()
-            conn.close()
-            st.error(
-                f"Authentication state is invalid or expired. "
-                f"DB path: `{_db_path()}` | "
-                f"Stored states: {len(rows)} | "
-                f"Received state prefix: `{state[:8]}...`"
-            )
+            st.error("Authentication state is invalid or expired. Please try signing in again.")
             _render_login_page()
             return
 
-        st.session_state["_auth_callback_state"] = state
         try:
             from google.auth.transport import requests as google_requests
             from google.oauth2 import id_token
@@ -268,7 +255,8 @@ def require_auth(cookie_manager) -> None:
             return
 
         except Exception as exc:
-            st.error(f"Authentication failed: {exc}")
+            import traceback
+            st.error(f"Authentication failed: {exc}\n\n```\n{traceback.format_exc()}\n```")
             _render_login_page()
             return
 
