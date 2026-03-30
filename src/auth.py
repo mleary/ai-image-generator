@@ -206,7 +206,15 @@ def require_auth(cookie_manager) -> None:
             st.stop()
 
         if not _consume_state(state):
-            st.error("Authentication state is invalid or expired. Please try signing in again.")
+            conn = sqlite3.connect(str(_db_path()))
+            rows = conn.execute("SELECT state, created_at FROM oauth_states").fetchall()
+            conn.close()
+            st.error(
+                f"Authentication state is invalid or expired. "
+                f"DB path: `{_db_path()}` | "
+                f"Stored states: {len(rows)} | "
+                f"Received state prefix: `{state[:8]}...`"
+            )
             _render_login_page()
             return
 
