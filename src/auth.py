@@ -201,9 +201,9 @@ def require_auth(cookie_manager) -> None:
         code = params.get("code", "")
         state = params.get("state", "")
 
-        # Guard against Streamlit double-rerun consuming the state twice.
-        if st.session_state.get("_auth_callback_state") == state:
-            st.stop()
+        # Clear params immediately so CookieManager-triggered reruns don't
+        # re-enter this branch and fail on the already-consumed state.
+        st.query_params.clear()
 
         if not _consume_state(state):
             conn = sqlite3.connect(str(_db_path()))
@@ -263,7 +263,6 @@ def require_auth(cookie_manager) -> None:
             token = _create_session(user["email"], user["name"], user["picture"])
             cookie_manager.set(_COOKIE_NAME, token, max_age=_SESSION_TTL)
             st.session_state["_auth_user"] = user
-            st.query_params.clear()
             st.rerun()
             return
 
