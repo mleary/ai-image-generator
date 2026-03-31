@@ -6,6 +6,7 @@ import streamlit as st
 
 from src import presets as preset_store
 from src import references as ref_store
+from src.generator import PROVIDERS
 from src.references import parse_reference_tokens, reference_exists
 from src.services.generation_service import GenerationRequest, generate_and_store
 from src.ui.sidebar import SidebarConfig
@@ -100,6 +101,14 @@ def render_generate_tab(sidebar_config: SidebarConfig) -> None:
             tags = st.text_input("Tags (comma-separated)", placeholder="roadmap, blue, wide")
 
     with col_right:
+        model_options = PROVIDERS[sidebar_config.provider]["models"]
+        st.selectbox(
+            "Model",
+            model_options,
+            index=model_options.index(st.session_state.selected_model),
+            key="selected_model",
+        )
+
         style_prompt = _render_preset_picker()
         reference_image_bytes = _render_reference_picker(
             sidebar_config.provider,

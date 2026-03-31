@@ -35,6 +35,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+st.markdown(
+    """
+    <style>
+    button[data-baseweb="tab"] > div > p {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 _cookie_manager = CookieManager(key="nano_banana_auth")
 require_auth(_cookie_manager)
 db.init_db()

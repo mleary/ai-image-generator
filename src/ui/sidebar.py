@@ -45,12 +45,6 @@ def render_sidebar(cookie_manager) -> SidebarConfig:
         model_options = PROVIDERS[provider]["models"]
         if st.session_state.selected_model not in model_options:
             st.session_state.selected_model = PROVIDERS[provider]["default_model"]
-        model = st.selectbox(
-            "Model",
-            model_options,
-            index=model_options.index(st.session_state.selected_model),
-            key="selected_model",
-        )
 
         api_key_env_var = PROVIDERS[provider]["api_key_env"]
         api_key = get_provider_api_key(provider)
@@ -67,6 +61,7 @@ def render_sidebar(cookie_manager) -> SidebarConfig:
                 "dall-e-3": ["1792x1024", "1024x1024", "1024x1792"],
                 "dall-e-2": ["256x256", "512x512", "1024x1024"],
             }
+            model = st.session_state.selected_model
             settings["size"] = st.selectbox("Size", size_map.get(model, ["1024x1024"]))
             if model == "dall-e-3":
                 settings["quality"] = st.selectbox("Quality", ["standard", "hd"])
@@ -74,7 +69,7 @@ def render_sidebar(cookie_manager) -> SidebarConfig:
 
     return SidebarConfig(
         provider=provider,
-        model=model,
+        model=st.session_state.selected_model,
         api_key=api_key,
         api_key_env_var=api_key_env_var,
         settings=settings,
