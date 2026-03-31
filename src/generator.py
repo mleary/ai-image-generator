@@ -139,6 +139,7 @@ def _generate_gemini_with_reference(
     prompt: str,
     reference_images: list[bytes],
     api_key: str,
+    settings: dict[str, Any] | None = None,
 ) -> tuple[bytes, str]:
     """Generate image using Gemini generate_content() with one or more reference images."""
     try:
@@ -151,6 +152,10 @@ def _generate_gemini_with_reference(
         ) from exc
 
     client = genai.Client(api_key=api_key)
+
+    aspect_ratio = (settings or {}).get("aspect_ratio", "1:1")
+    if aspect_ratio != "1:1":
+        prompt = f"{prompt}. Output the image in {aspect_ratio} aspect ratio."
 
     parts = []
     for img in reference_images:
@@ -233,7 +238,7 @@ def generate_image(
         if resolved_refs:
             generation_model = REFERENCE_GENERATION_MODEL
             image_bytes, ext = _generate_gemini_with_reference(
-                final_prompt, resolved_refs, resolved_key
+                final_prompt, resolved_refs, resolved_key, resolved_settings
             )
         else:
             generation_model = resolved_model
