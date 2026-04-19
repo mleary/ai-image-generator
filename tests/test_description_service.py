@@ -21,7 +21,8 @@ def test_returns_stripped_text_on_success():
     mock_genai = MagicMock()
     mock_genai.Client.return_value = mock_client
 
-    with patch("src.services.description_service.genai", mock_genai):
+    with patch("src.services.description_service.genai", mock_genai), \
+         patch("src.services.description_service.genai_types", MagicMock()):
         result = generate_short_description("A banana", "test-key")
 
     assert result == "Yellow banana on wooden table"
@@ -47,7 +48,8 @@ def test_strips_trailing_period():
     mock_genai = MagicMock()
     mock_genai.Client.return_value = mock_client
 
-    with patch("src.services.description_service.genai", mock_genai):
+    with patch("src.services.description_service.genai", mock_genai), \
+         patch("src.services.description_service.genai_types", MagicMock()):
         result = generate_short_description("A banana", "test-key")
 
     assert result == "Yellow banana on wooden table"
